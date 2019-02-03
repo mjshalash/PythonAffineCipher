@@ -9,8 +9,11 @@ SYMBOLS = """ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] ^_`a
 
 # Main Function
 def main():
-    myMessage = "IPv[f5 =$-Rvnf={svs-j-RV-v$fvB-v[){{-sv1N$-{{1^-N$v1Fv1$v[f={svs-[-1V-v)vw=5)Nv1N$fvB-{1-V1N^v$w)$v1$vn)jvw=5)NUIv<P{)NvK=R1N^"
-    myKey = 2487
+    # Define file to be read in
+    file = open("testFiles/test.txt", "r")
+
+    myMessage = file.read()
+    myKey = 506
     myMode = 'd'
 
     # Print statements for logging purposes
@@ -18,6 +21,7 @@ def main():
     print('Size of Symbols: %d' %(len(SYMBOLS)))
 
     # Determines whether we are encrypting a message or decrypting a message
+    # TODO Need to write back to same file with encrypted or decrypted text for easy conversion between the two
     if myMode == 'e':
         answer = encrypt(myKey, myMessage)
     elif myMode == 'd':
@@ -26,7 +30,7 @@ def main():
 
     # Print statements for logging purposes
     print('Key: %s' % (myKey))
-    print('%sed text:' % (myMode.title()))
+    print('Result: %s' % (myMode.title()))
     print(answer)
 
 # Get Key Parts
@@ -79,6 +83,8 @@ def decrypt(key, message):
             plaintext += symbol # just append this symbol undecrypted
     return plaintext
 
+# Automatically determines a key to use in encryption of data
+# TODO Need to determine a way to store the key and thus it can be automatically used for decryption
 def getRandomKey():
     while True:
         keyA = random.randint(2, len(SYMBOLS))
@@ -86,7 +92,6 @@ def getRandomKey():
         if cryptomath.gcd(keyA, len(SYMBOLS)) == 1:
             return keyA * len(SYMBOLS) + keyB
 
-# If affineCipher.py is run (instead of imported as a module) call
-# the main() function.
+
 if __name__ == '__main__':
     main()
