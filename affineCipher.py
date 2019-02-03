@@ -9,6 +9,12 @@ SYMBOLS = """ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] ^_`a
 
 # Main Function
 def main():
+
+    # For testing ascii values
+    for i in range(1, 255):
+        ch = chr(i)
+        print(i, "=", ch)
+
     # Define file to be read in
     file = open("testFiles/test.txt", "r")
 
@@ -49,7 +55,7 @@ def checkKeys(keyA, keyB, mode):
     if cryptomath.gcd(keyA, len(SYMBOLS)) != 1:
         sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, len(SYMBOLS)))  
 
-      
+# Affine Encryption function
 def encrypt(key, message):
     a, b = getKeyParts(key)  # Establish both key and key b by returning a tuple from the function
 
@@ -68,6 +74,7 @@ def encrypt(key, message):
                 cipherText += symbol
     return cipherText
 
+#Affine Decryption function
 def decrypt(key, message):
     keyA, keyB = getKeyParts(key)
     checkKeys(keyA, keyB, 'decrypt')
