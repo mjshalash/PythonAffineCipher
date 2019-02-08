@@ -18,9 +18,10 @@ def main():
     # Define file to be read in
     file = open("testFiles/test.txt", "r")
 
+    # Initial Parameters
     myMessage = file.read()
-    myKey = 506
-    myMode = 'd'
+    myKey = getRandomKey()
+    myMode = 'e'
 
     # Print statements for logging purposes
     print('Key: %s' % (myKey))
