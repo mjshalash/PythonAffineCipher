@@ -1,16 +1,11 @@
-import sys, os, random
-import hackingCipher, cryptomath
+import sys, os, random, string
+import attack, cryptomath
 
-SYMBOLS = """ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\] ^_`abcdefghijklmnopqrstuvwxyz{|}~"""
+# Contains all the possible ascii charachters that can be printed on the screen
+ASCIISymbols = string.printable
 
 def main():
-    print ("Hello,\n")
-    print ("Please choose your desired action:")
-    print ("1. Encrypt/Decrypt a Message")
-    print ("2. Hack a Message")
-    print ("\n0. Quit")
-    choice = input(" >>  ")
-    exec_menu(choice)
+    useCipher()
 
 
 def exec_menu(choice):
@@ -37,12 +32,12 @@ def useCipher():
     file = open("testFiles/test.txt", "r")
 
     myMessage = file.read()
-    myKey = getRandomKey()
-    myMode = 'e'
+    myKey = 8981
+    myMode = 'd'
 
     # Print statements for logging purposes
     print('Key: %s' % (myKey))
-    print('Size of Symbols: %d' %(len(SYMBOLS)))
+    print('Size of Symbols: %d', len(ASCIISymbols))
 
     # Determines whether we are encrypting a message or decrypting a message
     # TODO Need to write back to same file with encrypted or decrypted text for easy conversion between the two
@@ -59,8 +54,8 @@ def useCipher():
 
 # Get Key Parts
 def getKeyParts(key):
-    a = key // len(SYMBOLS)    # Quotient 
-    b = key % len(SYMBOLS)     # Remainder
+    a = key // len(ASCIISymbols)    # Quotient 
+    b = key % len(ASCIISymbols)     # Remainder
     return (a, b)              # Return tuple of both keys
 
 def checkKeys(keyA, keyB, mode):
@@ -68,10 +63,10 @@ def checkKeys(keyA, keyB, mode):
         sys.exit('The affine cipher becomes incredibly weak when key A is set to 1. Choose a different key.')
     if keyB == 0 and mode == 'encrypt':
         sys.exit('The affine cipher becomes incredibly weak when key B is set to 0. Choose a different key.')
-    if keyA < 0 or keyB < 0 or keyB > len(SYMBOLS) - 1:
-        sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (len(SYMBOLS) - 1))
-    if cryptomath.gcd(keyA, len(SYMBOLS)) != 1:
-        sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, len(SYMBOLS)))  
+    if keyA < 0 or keyB < 0 or keyB > len(ASCIISymbols) - 1:
+        sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (len(ASCIISymbols) - 1))
+    if cryptomath.gcd(keyA, len(ASCIISymbols)) != 1:
+        sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, len(ASCIISymbols)))  
 
 # Affine Encryption function
 def encrypt(key, message):
@@ -83,10 +78,10 @@ def encrypt(key, message):
     checkKeys(a, b, 'e')     # Validate that keys are correct
     cipherText = ''
     for symbol in message:
-            if symbol in SYMBOLS:
+            if symbol in ASCIISymbols:
                 # Encrypt Specific Symbol
-                symIndex = SYMBOLS.find(symbol)
-                cipherText += SYMBOLS[(symIndex * a + b) % len(SYMBOLS)]
+                symIndex = ASCIISymbols.find(symbol)
+                cipherText += ASCIISymbols[(symIndex * a + b) % len(ASCIISymbols)]
             else:
                 # Append the symbol to our current solution
                 cipherText += symbol
@@ -97,13 +92,13 @@ def decrypt(key, message):
     keyA, keyB = getKeyParts(key)
     checkKeys(keyA, keyB, 'decrypt')
     plaintext = ''
-    modInverseOfKeyA = cryptomath.findModInverse(keyA, len(SYMBOLS))
+    modInverseOfKeyA = cryptomath.findModInverse(keyA, len(ASCIISymbols))
 
     for symbol in message:
-        if symbol in SYMBOLS:
+        if symbol in ASCIISymbols:
             # decrypt this symbol
-            symIndex = SYMBOLS.find(symbol)
-            plaintext += SYMBOLS[(symIndex - keyB) * modInverseOfKeyA % len(SYMBOLS)]
+            symIndex = ASCIISymbols.find(symbol)
+            plaintext += ASCIISymbols[(symIndex - keyB) * modInverseOfKeyA % len(ASCIISymbols)]
         else:
             plaintext += symbol # just append this symbol undecrypted
     return plaintext
@@ -112,10 +107,10 @@ def decrypt(key, message):
 # TODO Need to determine a way to store the key and thus it can be automatically used for decryption
 def getRandomKey():
     while True:
-        keyA = random.randint(2, len(SYMBOLS))
-        keyB = random.randint(2, len(SYMBOLS))
-        if cryptomath.gcd(keyA, len(SYMBOLS)) == 1:
-            return keyA * len(SYMBOLS) + keyB
+        keyA = random.randint(2, len(ASCIISymbols))
+        keyB = random.randint(2, len(ASCIISymbols))
+        if cryptomath.gcd(keyA, len(ASCIISymbols)) == 1:
+            return keyA * len(ASCIISymbols) + keyB
 
 # Main Program
 if __name__ == "__main__":
