@@ -8,11 +8,13 @@ def main():
     3.) Attack Encrypted test.txt
     """)
 
-    res = input("What would you like to do?")
+    res = input("What would you like to do? \n")
 
     if res == '1':
+        print("Encrypting... \n")
         useCipher('e')
     elif res == '2':
+        print("Decrypting... \n")
         useCipher('d')
     elif res == '3':
         print("Attacking")
@@ -20,22 +22,13 @@ def main():
         print("Error")
 
 def useCipher(mode):
-    # For testing ascii values
-    for i in range(1, 255):
-        ch = chr(i)
-        print(i, "=", ch)
-
     # Define file to be read in
     file = open("testFiles/test.txt", "r")
 
     # Encryption/Decryption paramaters
     myMessage = file.read()
-    myKey = getRandomKey()
+    myKey = 37293
     myMode = mode
-
-    # Print statements for logging purposes
-    print('Key: %s' % (myKey))
-    print('Size of Symbols: %d', 256)
 
     # Determines whether we are encrypting a message or decrypting a message
     # TODO Need to write back to same file with encrypted or decrypted text for easy conversion between the two
@@ -47,28 +40,28 @@ def useCipher(mode):
 
     # Print statements for logging purposes
     print('Key: %s' % (myKey))
-    print('Result: %s' % (myMode.title()))
     print(answer)
+    print(len(answer))
 
     file.close()
 
     # Write back to test file
-    file2 = open("testFiles/test.txt", "w")
-    file2.write(answer)
+    # file2 = open("testFiles/test.txt", "w")
+    # file2.write(answer)
 
 # Get Key Parts
 def getKeyParts(key):
     a = key // 256    # Quotient 
     b = key % 256     # Remainder
-    return (a, b)              # Return tuple of both keys
+    return (a, b)     # Return tuple of both keys
 
 def checkKeys(keyA, keyB, mode):
     if keyA == 1 and mode == 'e':
-        sys.exit('The affine cipher becomes incredibly weak when key A is set to 1. Choose a different key.')
+        sys.exit('a equals one.  Choose a different key.')
     if keyB == 0 and mode == 'e':
-        sys.exit('The affine cipher becomes incredibly weak when key B is set to 0. Choose a different key.')
-    if keyA < 0 or keyB < 0 or keyB > 256 - 1:
-        sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (256 - 1))
+        sys.exit('b equals one.  Choose a different key.')
+    if keyA < 0 or keyB < 0 or keyB > 255:
+        sys.exit('a must be greater than 0 and b must be between 0 and %s.' % (255))
     if gcd(keyA, 256) != 1:
         sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, 256))  
 
@@ -81,15 +74,11 @@ def encrypt(key, message):
 
     checkKeys(a, b, 'e')     # Validate that keys are correct
     cipherText = ''
-    for symbol in message:   # For each letter in the .txt file, run it through encryption function
-            # If the symbol is not some special charachter
-            if ord(symbol) < 256 and 0 <= ord(symbol): 
-                # Encrypt Specific Symbol
-                symIndex = ord(symbol)
-                cipherText += chr((symIndex * a + b) % 256)
-            else:
-                # Otherwise just add it to the text
-                cipherText += symbol
+    for symbol in message:   # For each letter in the .txt file, run it through encryption function 
+        symIndex = ord(symbol)
+        cipherText += chr((symIndex * a + b) % 256)
+
+    #print(decrypt(key, cipherText))
     return cipherText
 
 # Affine Decryption function
@@ -100,12 +89,9 @@ def decrypt(key, message):
     modInverseOfKeyA = findModInverse(keyA, 256)
 
     for symbol in message:
-        if ord(symbol) < 256 and 0 <= ord(symbol):   # If symbol is an accepted ascii char
-            # decrypt this symbol
-            symIndex = ord(symbol)
-            plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
-        else:
-            plaintext += symbol # just append this symbol undecrypted
+        symIndex = ord(symbol)
+        plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
+    
     return plaintext
 
 # Automatically determines a key to use in encryption of data
