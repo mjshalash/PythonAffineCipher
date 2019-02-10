@@ -28,37 +28,74 @@ def main():
     firstAscii = ord(firstComChar)
     secondAscii = ord(secondComChar)
 
+    # Print statements for verification
+    print("Most Common Charachter: %s with Ascii value: %d" % (firstComChar, firstAscii))
+    print("Second Most Common Charachter: %s with Ascii value: %d" % (secondComChar, secondAscii))
+
     # Final Equation Variables
     y3 = 0
     x3 = 0
 
-    # Equation would be set up as so
-    # y1 = (ax1 + b) % m  Encryption Function
+    # Relevant equations
+    # y1 = (ax1 + b) % 256
+    # b = y1 - ax1 % 256
+    # a = 141 (y1 - y2)
+    #
     # encryptedSpace = (a(asciiSpace) + b) % 256         First Equation
     # encryptedE = (a(asciiE) + b) % 256                 Second Equation
 
-    y3 = secondAscii - firstAscii
-    x3 = asciiE - asciiSpace
+    #----------------- Attempt Number 1--------------------#
+    # y3 = secondAscii - firstAscii
+    # x3 = asciiE - asciiSpace
 
-    # Now one equation is y3 = a(x3)
-    inv = mainAffine.findModInverse(x3, len(mainAffine.ASCIISymbols)) # Find modular inverse of x3 and 256
+    # # Now one equation is y3 = a(x3)
+    # inv = mainAffine.findModInverse(x3, len(mainAffine.ASCIISymbols)) # Find modular inverse of x3 and 256
 
-    a = (inv*y3) % 256 # This is what "a" equals
+    # a = (inv*y3) % len(mainAffine.ASCIISymbols) # This is what "a" equals
+    # print("This is a: ", a)
+    # print(" ")
+    
+    # x4 = x3
+    # print("x4 is: ", x4)
+    # x4Inv = mainAffine.findModInverse(x4, len(ASCIISymbols))
+    # print("x4Inv is: ", x4Inv)
+
+    # b = (x4Inv)*((asciiSpace*secondAscii) - (asciiE*firstAscii))
+    
+    
+    #----------------- Attempt Number 2 --------------------#
+    a = 141*(firstAscii - secondAscii)
+    b = (firstAscii - (a)*(asciiSpace)) % (len(mainAffine.ASCIISymbols))
+
     print("This is a: ", a)
-    print(" ")
-    
-    x4 = x3
-    print("x4 is: ", x4)
-    x4Inv = mainAffine.findModInverse(x4, len(mainAffine.ASCIISymbols))
-    print("x4Inv is: ", x4Inv)
-
-    b = (x4Inv)*((asciiSpace*secondAscii) - (asciiE*firstAscii))
-    
-    
     print("This is b: ", b)
 
     # Apply a and b to decryption formula
-    mainAffine
+    decryptViaAttack(a, b, myMessage)
+
+#Affine Decryption function
+def decryptViaAttack(a, b, message):
+    keyA = a
+
+    print("keyA is: ", keyA)
+    print("Length is: ", len(mainAffine.ASCIISymbols))
+
+    keyB = b
+    mainAffine.checkKeys(keyA, keyB, 'd')
+
+    plaintext = ''
+    modInverseOfKeyA = mainAffine.findModInverse(keyA, len(mainAffine.ASCIISymbols))
+
+    print("Mod Inverse of A is: ", modInverseOfKeyA)
+
+    for symbol in message:
+        if symbol in mainAffine.ASCIISymbols:
+            # decrypt this symbol
+            symIndex = mainAffine.ASCIISymbols.find(symbol)
+            plaintext += mainAffine.ASCIISymbols[(symIndex - keyB) * modInverseOfKeyA % len(mainAffine.ASCIISymbols)]
+        else:
+            plaintext += symbol # just append this symbol undecrypted
+    print(plaintext)
 
 def getCommon(list):
     # Return just the charachter

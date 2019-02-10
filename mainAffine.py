@@ -66,9 +66,9 @@ def getKeyParts(key):
     return (a, b)              # Return tuple of both keys
 
 def checkKeys(keyA, keyB, mode):
-    if keyA == 1 and mode == 'encrypt':
+    if keyA == 1 and mode == 'e':
         sys.exit('The affine cipher becomes incredibly weak when key A is set to 1. Choose a different key.')
-    if keyB == 0 and mode == 'encrypt':
+    if keyB == 0 and mode == 'e':
         sys.exit('The affine cipher becomes incredibly weak when key B is set to 0. Choose a different key.')
     if keyA < 0 or keyB < 0 or keyB > len(ASCIISymbols) - 1:
         sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (len(ASCIISymbols) - 1))
@@ -85,7 +85,7 @@ def encrypt(key, message):
     checkKeys(a, b, 'e')     # Validate that keys are correct
     cipherText = ''
     for symbol in message:   # For each letter in the .txt file, run it through encryption function
-            #If the symbol is not some special charachter
+            # If the symbol is not some special charachter
             if symbol in ASCIISymbols:
                 # Encrypt Specific Symbol
                 symIndex = ASCIISymbols.find(symbol)
@@ -95,10 +95,10 @@ def encrypt(key, message):
                 cipherText += symbol
     return cipherText
 
-#Affine Decryption function
+# Affine Decryption function
 def decrypt(key, message):
     keyA, keyB = getKeyParts(key)
-    checkKeys(keyA, keyB, 'decrypt')
+    checkKeys(keyA, keyB, 'd')
     plaintext = ''
     modInverseOfKeyA = findModInverse(keyA, len(ASCIISymbols))
 
