@@ -33,15 +33,9 @@ def useCipher(mode):
     # Determines whether we are encrypting a message or decrypting a message
     # TODO Need to write back to same file with encrypted or decrypted text for easy conversion between the two
     if myMode == 'e':
-        answer = encrypt(myKey, myMessage)
+        encrypt(myKey, myMessage)
     elif myMode == 'd':
-        answer = decrypt(myKey, myMessage)
-    
-
-    # Print statements for logging purposes
-    print('Key: %s' % (myKey))
-    print(answer)
-    print(len(answer))
+        decrypt(myKey, myMessage)
 
     file.close()
 
@@ -78,8 +72,9 @@ def encrypt(key, message):
         symIndex = ord(symbol)
         cipherText += chr((symIndex * a + b) % 256)
 
-    #print(decrypt(key, cipherText))
-    return cipherText
+    print(decrypt(key, cipherText))
+    print(attack.attackCipher(cipherText))
+    
 
 # Affine Decryption function
 def decrypt(key, message):

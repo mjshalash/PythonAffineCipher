@@ -6,15 +6,15 @@
 import sys, os, collections, mainAffine
 
 # Global variables for two most common ascii values
-asciiE = 69
+asciiE = 101
 asciiSpace = 32
 
 # Read in encrypted file
-def main():
+def attackCipher(ciphertext):
     
     # Define file to be read in
-    file = open("testFiles/test.txt", "r")
-    myMessage = file.read()
+    # file = open("testFiles/test.txt", "r")
+    myMessage = ciphertext
 
     # Assume that " " and "e" are the two most common charachters in encypted text
     firstCount = collections.Counter(myMessage).most_common(2)[0]   # Assume this charachter is ' '
@@ -25,8 +25,8 @@ def main():
     secondComChar = getCommon(secondCount)
 
     # Find the ascii values for encrypted charachters
-    firstAscii = ord(firstComChar)
-    secondAscii = ord(secondComChar)
+    firstAscii = ord(firstComChar)   # Space
+    secondAscii = ord(secondComChar) # E
 
     # Print statements for verification
     print("Most Common Charachter: %s with Ascii value: %d" % (firstComChar, firstAscii))
@@ -36,42 +36,14 @@ def main():
     y3 = 0
     x3 = 0
 
-    # Relevant equations
-    # y1 = (ax1 + b) % 256
-    # b = y1 - ax1 % 256
-    # a = 141 (y1 - y2)
-    #
-    # encryptedSpace = (a(asciiSpace) + b) % 256         First Equation
-    # encryptedE = (a(asciiE) + b) % 256                 Second Equation
-
-    #----------------- Attempt Number 1--------------------#
-    # y3 = secondAscii - firstAscii
-    # x3 = asciiE - asciiSpace
-
-    # # Now one equation is y3 = a(x3)
-    # inv = mainAffine.findModInverse(x3, len(mainAffine.ASCIISymbols)) # Find modular inverse of x3 and 256
-
-    # a = (inv*y3) % len(mainAffine.ASCIISymbols) # This is what "a" equals
-    # print("This is a: ", a)
-    # print(" ")
-    
-    # x4 = x3
-    # print("x4 is: ", x4)
-    # x4Inv = mainAffine.findModInverse(x4, len(ASCIISymbols))
-    # print("x4Inv is: ", x4Inv)
-
-    # b = (x4Inv)*((asciiSpace*secondAscii) - (asciiE*firstAscii))
-    
-    
-    #----------------- Attempt Number 2 --------------------#
-    a = (141*(firstAscii - secondAscii)) % (256)
+    a = (115*(firstAscii - secondAscii)) % (256) # 115 is inverse of 101 - 32 = 69
     b = (firstAscii - (a)*(asciiSpace)) % (256)
 
     print("This is a: ", (a % 256))
     print("This is b: ", (b % 256))
 
     # Apply a and b to decryption formula
-    decryptViaAttack(a, b, myMessage)
+    decryptViaAttack(a, b, ciphertext)
 
 #Affine Decryption function
 def decryptViaAttack(a, b, message):
@@ -89,19 +61,11 @@ def decryptViaAttack(a, b, message):
     print("Mod Inverse of A is: ", modInverseOfKeyA)
 
     for symbol in message:
-        if symbol in ord(symbol) < 256 and 0 <= ord(symbol):
-            # decrypt this symbol
-            symIndex = ord(symbol)
-            plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
-        else:
-            plaintext += symbol # just append this symbol undecrypted
+        symIndex = ord(symbol)
+        plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
+    
     print(plaintext)
 
 def getCommon(list):
     # Return just the charachter
     return list[0]
-    
-
-
-if __name__ == '__main__':
-    main()
