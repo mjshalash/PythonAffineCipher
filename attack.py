@@ -64,11 +64,11 @@ def main():
     
     
     #----------------- Attempt Number 2 --------------------#
-    a = 141*(firstAscii - secondAscii)
+    a = (141*(firstAscii - secondAscii)) % (len(mainAffine.ASCIISymbols))
     b = (firstAscii - (a)*(asciiSpace)) % (len(mainAffine.ASCIISymbols))
 
-    print("This is a: ", a)
-    print("This is b: ", b)
+    print("This is a: ", (a % (len(mainAffine.ASCIISymbols))))
+    print("This is b: ", (b % (len(mainAffine.ASCIISymbols))))
 
     # Apply a and b to decryption formula
     decryptViaAttack(a, b, myMessage)
