@@ -1,9 +1,6 @@
 import sys, os, random, string
 import attack
 
-# Contains all the possible ascii charachters that can be printed on the screen
-ASCIISymbols = string.printable
-
 def main():
     print("""
     1.) Encrypt test.txt
@@ -38,7 +35,7 @@ def useCipher(mode):
 
     # Print statements for logging purposes
     print('Key: %s' % (myKey))
-    print('Size of Symbols: %d', len(ASCIISymbols))
+    print('Size of Symbols: %d', 256)
 
     # Determines whether we are encrypting a message or decrypting a message
     # TODO Need to write back to same file with encrypted or decrypted text for easy conversion between the two
@@ -61,8 +58,8 @@ def useCipher(mode):
 
 # Get Key Parts
 def getKeyParts(key):
-    a = key // len(ASCIISymbols)    # Quotient 
-    b = key % len(ASCIISymbols)     # Remainder
+    a = key // 256    # Quotient 
+    b = key % 256     # Remainder
     return (a, b)              # Return tuple of both keys
 
 def checkKeys(keyA, keyB, mode):
@@ -70,10 +67,10 @@ def checkKeys(keyA, keyB, mode):
         sys.exit('The affine cipher becomes incredibly weak when key A is set to 1. Choose a different key.')
     if keyB == 0 and mode == 'e':
         sys.exit('The affine cipher becomes incredibly weak when key B is set to 0. Choose a different key.')
-    if keyA < 0 or keyB < 0 or keyB > len(ASCIISymbols) - 1:
-        sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (len(ASCIISymbols) - 1))
-    if gcd(keyA, len(ASCIISymbols)) != 1:
-        sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, len(ASCIISymbols)))  
+    if keyA < 0 or keyB < 0 or keyB > 256 - 1:
+        sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (256 - 1))
+    if gcd(keyA, 256) != 1:
+        sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, 256))  
 
 # Affine Encryption function
 def encrypt(key, message):
@@ -86,10 +83,10 @@ def encrypt(key, message):
     cipherText = ''
     for symbol in message:   # For each letter in the .txt file, run it through encryption function
             # If the symbol is not some special charachter
-            if symbol in ASCIISymbols:
+            if ord(symbol) < 256 and 0 <= ord(symbol): 
                 # Encrypt Specific Symbol
-                symIndex = ASCIISymbols.find(symbol)
-                cipherText += ASCIISymbols[(symIndex * a + b) % len(ASCIISymbols)]
+                symIndex = ord(symbol)
+                cipherText += chr((symIndex * a + b) % 256)
             else:
                 # Otherwise just add it to the text
                 cipherText += symbol
@@ -100,13 +97,13 @@ def decrypt(key, message):
     keyA, keyB = getKeyParts(key)
     checkKeys(keyA, keyB, 'd')
     plaintext = ''
-    modInverseOfKeyA = findModInverse(keyA, len(ASCIISymbols))
+    modInverseOfKeyA = findModInverse(keyA, 256)
 
     for symbol in message:
-        if symbol in ASCIISymbols:
+        if ord(symbol) < 256 and 0 <= ord(symbol):   # If symbol is an accepted ascii char
             # decrypt this symbol
-            symIndex = ASCIISymbols.find(symbol)
-            plaintext += ASCIISymbols[(symIndex - keyB) * modInverseOfKeyA % len(ASCIISymbols)]
+            symIndex = ord(symbol)
+            plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
         else:
             plaintext += symbol # just append this symbol undecrypted
     return plaintext
@@ -115,10 +112,10 @@ def decrypt(key, message):
 # TODO Need to determine a way to store the key and thus it can be automatically used for decryption
 def getRandomKey():
     while True:
-        keyA = random.randint(2, len(ASCIISymbols))
-        keyB = random.randint(2, len(ASCIISymbols))
-        if gcd(keyA, len(ASCIISymbols)) == 1:
-            return keyA * len(ASCIISymbols) + keyB
+        keyA = random.randint(2, 256)
+        keyB = random.randint(2, 256)
+        if gcd(keyA, 256) == 1:
+            return keyA * 256 + keyB
 
 
 # Necessary Math operations

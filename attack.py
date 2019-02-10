@@ -64,11 +64,11 @@ def main():
     
     
     #----------------- Attempt Number 2 --------------------#
-    a = (141*(firstAscii - secondAscii)) % (len(mainAffine.ASCIISymbols))
-    b = (firstAscii - (a)*(asciiSpace)) % (len(mainAffine.ASCIISymbols))
+    a = (141*(firstAscii - secondAscii)) % (256)
+    b = (firstAscii - (a)*(asciiSpace)) % (256)
 
-    print("This is a: ", (a % (len(mainAffine.ASCIISymbols))))
-    print("This is b: ", (b % (len(mainAffine.ASCIISymbols))))
+    print("This is a: ", (a % 256))
+    print("This is b: ", (b % 256))
 
     # Apply a and b to decryption formula
     decryptViaAttack(a, b, myMessage)
@@ -78,21 +78,21 @@ def decryptViaAttack(a, b, message):
     keyA = a
 
     print("keyA is: ", keyA)
-    print("Length is: ", len(mainAffine.ASCIISymbols))
+    print("Length is: ", 256)
 
     keyB = b
     mainAffine.checkKeys(keyA, keyB, 'd')
 
     plaintext = ''
-    modInverseOfKeyA = mainAffine.findModInverse(keyA, len(mainAffine.ASCIISymbols))
+    modInverseOfKeyA = mainAffine.findModInverse(keyA, 256)
 
     print("Mod Inverse of A is: ", modInverseOfKeyA)
 
     for symbol in message:
-        if symbol in mainAffine.ASCIISymbols:
+        if symbol in ord(symbol) < 256 and 0 <= ord(symbol):
             # decrypt this symbol
-            symIndex = mainAffine.ASCIISymbols.find(symbol)
-            plaintext += mainAffine.ASCIISymbols[(symIndex - keyB) * modInverseOfKeyA % len(mainAffine.ASCIISymbols)]
+            symIndex = ord(symbol)
+            plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
         else:
             plaintext += symbol # just append this symbol undecrypted
     print(plaintext)
