@@ -63,8 +63,8 @@ def checkKeys(keyA, keyB, mode):
 def encrypt(key, message):
     a, b = getKeyParts(key)  # Establish both key and key b by returning a tuple from the function
 
-    print('Key A is %d', a)
-    print('Key B is %d', b)
+    print('Key A is ', a)
+    print('Key B is ', b)
 
     checkKeys(a, b, 'e')     # Validate that keys are correct
     cipherText = ''
@@ -72,8 +72,7 @@ def encrypt(key, message):
         symIndex = ord(symbol)
         cipherText += chr((symIndex * a + b) % 256)
 
-    print(decrypt(key, cipherText))
-    print(attack.attackCipher(cipherText))
+    print("Decryption Result: ", decrypt(key, cipherText))
     
 
 # Affine Decryption function
