@@ -1,5 +1,4 @@
-import sys, os, random, string
-import attack
+import sys, os, random, string, collections
 
 def main():
     print("""
@@ -61,20 +60,21 @@ def checkKeys(keyA, keyB, mode):
 
 # Affine Encryption function
 def encrypt(key, message):
-    a, b = getKeyParts(key)  # Establish both key and key b by returning a tuple from the function
+    origA, origB = getKeyParts(key)  # Establish both key and key b by returning a tuple from the function
 
-    print('Key A is ', a)
-    print('Key B is ', b)
+    print('Key A is ', origA)
+    print('Key B is ', origB)
 
-    checkKeys(a, b, 'e')     # Validate that keys are correct
+    checkKeys(origA, origB, 'e')     # Validate that keys are correct
     cipherText = ''
     for symbol in message:   # For each letter in the .txt file, run it through encryption function 
         symIndex = ord(symbol)
-        cipherText += chr((symIndex * a + b) % 256)
+        cipherText += chr((symIndex * origA + origB) % 256)
 
     print(cipherText)
     print("Decryption Result: ", decrypt(key, cipherText))
-    attack.attackCipher(cipherText)
+    
+    attackCipher(cipherText, origA, origB)
     
 
 # Affine Decryption function
@@ -124,6 +124,78 @@ def findModInverse(a, m):
         v1, v2, v3, u1, u2, u3 = (u1 - q * v1), (u2 - q * v2), (u3 - q * v3), v1, v2, v3
     
     return u1 % m
+
+    # Read in encrypted file
+def attackCipher(ciphertext, origA, origB):
+    asciiSpace = 32
+    # asciiE = 101
+    
+    # Final Equation Variables
+    a = 0
+    b = 0
+
+    # Assume that " " and "e" are the two most common charachters in encypted text
+    firstAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[0]))   # Assume this charachter is ' '
+    secondAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[1]))   # Assume this charachter is e
+
+    a = (115*(firstAscii - secondAscii)) % (256) # 115 is inverse of 101 - 32 = 69
+    b = (firstAscii - (a)*(asciiSpace)) % (256)
+
+    checkKeys(a, b, 'd')
+
+    # Verify the attack keys are same as original encryption keys
+    # If so, then attack succeeded
+    if a == origA and b == origB: 
+        print("Keys Match, Attack Succeeded!")
+    else:
+        print("Attack Failed!")
+
+    plaintext = ''
+    modInverseOfKeyA = findModInverse(a, 256)
+
+    for symbol in ciphertext:
+        symIndex = ord(symbol)
+        plaintext += chr((symIndex - b) * modInverseOfKeyA % 256)
+    
+    print("Attack result: ", plaintext)
+
+def attackCipherASpace(ciphertext, origA, origB):
+    asciiSpace = 32
+    # asciiA = 97
+    
+    # Final Equation Variables
+    a = 0
+    b = 0
+
+    # Assume that " " and "e" are the two most common charachters in encypted text
+    firstAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[0]))   # Assume this charachter is ' '
+    secondAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[1]))   # Assume this charachter is a
+
+    a = (193*(firstAscii - secondAscii)) % (256) # 115 is inverse of 97 - 32 = 65
+    b = (firstAscii - (a)*(asciiSpace)) % (256)
+
+    checkKeys(a, b, 'd')
+
+    # Verify the attack keys are same as original encryption keys
+    # If so, then attack succeeded
+    if a == origA and b == origB: 
+        print("Keys Match, Attack Succeeded!")
+    else:
+        print("Attack Failed!")
+
+    plaintext = ''
+    modInverseOfKeyA = findModInverse(a, 256)
+
+    for symbol in ciphertext:
+        symIndex = ord(symbol)
+        plaintext += chr((symIndex - b) * modInverseOfKeyA % 256)
+    
+    print("Attack result: ", plaintext)    
+
+# Get only the charachter from the list
+def getCommon(list):
+    return list[0]
+
 
 # Main Program
 if __name__ == "__main__":
