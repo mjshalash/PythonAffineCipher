@@ -171,7 +171,7 @@ def attackCipherASpace(ciphertext, origA, origB):
     firstAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[0]))   # Assume this charachter is ' '
     secondAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[1]))   # Assume this charachter is a
 
-    a = (193*(firstAscii - secondAscii)) % (256) # 115 is inverse of 97 - 32 = 65
+    a = (193*(firstAscii - secondAscii)) % (256) # 193 is inverse of 97 - 32 = 65
     b = (firstAscii - (a)*(asciiSpace)) % (256)
 
     checkKeys(a, b, 'd')

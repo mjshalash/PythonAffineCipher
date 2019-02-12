@@ -5,16 +5,33 @@ def main():
     bruteHackAffine(myMessage)
 
 def bruteHackAffine(message):
+    # Flag to signal if possible solution found
+    foundFlag = 0
+
+    file = open("common.txt", "r")
+
+    # Encryption/Decryption paramaters
+    commonWords = file.read()
+   
     print('Hacking...')
     
     # brute-force by looping through every possible key
-    for key in range(len(mainAffine.ASCIISymbols) ** 2):
+    for key in range(256 ** 2):
         keyA = mainAffine.getKeyParts(key)[0]
-        if mainAffine.gcd(keyA, len(mainAffine.ASCIISymbols)) != 1:
+        if mainAffine.gcd(keyA, 256) != 1:      # Continue through next iteration if not relatively prime
             continue
 
         decryptedText = mainAffine.decrypt(key, message)
-        print('Tried Key %s... (%s)' % (key, decryptedText[:40]))
+        
+        for word in decryptedText.split():
+            for commonWord in commonWords.split():
+                if foundFlag == 0 and word == commonWord:
+                        foundFlag = 1
+
+        if foundFlag:
+            print('Tried Key %s... (%s)' % (key, decryptedText[:40]))
+            
+           
 
     return None
 
