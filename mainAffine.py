@@ -26,7 +26,7 @@ def useCipher(mode):
 
     # Encryption/Decryption paramaters
     myMessage = file.read()
-    myKey = 37293
+    myKey = 37293 #getRandomKey
     myMode = mode
 
     # Determines whether we are encrypting a message or decrypting a message
@@ -62,21 +62,18 @@ def checkKeys(keyA, keyB, mode):
 def encrypt(key, message):
     origA, origB = getKeyParts(key)  # Establish both key and key b by returning a tuple from the function
 
-    print('Key A is ', origA)
-    print('Key B is ', origB)
-
     checkKeys(origA, origB, 'e')     # Validate that keys are correct
     cipherText = ''
     for symbol in message:   # For each letter in the .txt file, run it through encryption function 
         symIndex = ord(symbol)
         cipherText += chr((symIndex * origA + origB) % 256)
 
-    print(cipherText)
-    print("Decryption Result: ", decrypt(key, cipherText))
+    print("Ciphertext: "+ cipherText)
+    print("Plaintext: "+ decrypt(key, cipherText))
     
+    # Run attack function to see if same keys can be achieved
     attackCipher(cipherText, origA, origB)
     
-
 # Affine Decryption function
 def decrypt(key, message):
     keyA, keyB = getKeyParts(key)
@@ -90,8 +87,7 @@ def decrypt(key, message):
     
     return plaintext
 
-# Automatically determines a key to use in encryption of data
-# TODO Need to determine a way to store the key and thus it can be automatically used for decryption
+# Generates a random key to improve probabilistic security
 def getRandomKey():
     while True:
         keyA = random.randint(2, 256)
@@ -99,42 +95,15 @@ def getRandomKey():
         if gcd(keyA, 256) == 1:
             return keyA * 256 + keyB
 
-
-# Necessary Math operations
-# Finding greatest common divisor
-def gcd(a, b):
-    # Return the GCD of a and b using Euclid's Algorithm
-    while a != 0:
-        a, b = b % a, a
-    return b
-
-# Euclidean Algorithm
-def findModInverse(a, m):
-    # Returns the modular inverse of a % m, which is
-    # the number x such that a*x % m = 1
-
-    if gcd(a, m) != 1:
-        return None # no mod inverse if a & m aren't relatively prime
-
-    # Calculate using the Extended Euclidean Algorithm:
-    u1, u2, u3 = 1, 0, a
-    v1, v2, v3 = 0, 1, m
-    while v3 != 0:
-        q = u3 // v3 # // is the integer division operator
-        v1, v2, v3, u1, u2, u3 = (u1 - q * v1), (u2 - q * v2), (u3 - q * v3), v1, v2, v3
-    
-    return u1 % m
-
-    # Read in encrypted file
+# --------------------Attack Section -------------------- 
 def attackCipher(ciphertext, origA, origB):
     asciiSpace = 32
-    # asciiE = 101
     
     # Final Equation Variables
     a = 0
     b = 0
 
-    # Assume that " " and "e" are the two most common charachters in encypted text
+    # Find the two most common charachters in the cipher text
     firstAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[0]))   # Assume this charachter is ' '
     secondAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[1]))   # Assume this charachter is e
 
@@ -146,7 +115,9 @@ def attackCipher(ciphertext, origA, origB):
     # Verify the attack keys are same as original encryption keys
     # If so, then attack succeeded
     if a == origA and b == origB: 
-        print("Keys Match, Attack Succeeded!")
+        print ("a = "+a+" = Original a: "+origA)
+        print ("b = "+b+" = Original b: "+origB)
+        print("Encryption Keys Found, Attack Succeeded!")
     else:
         print("Attack Failed!")
 
@@ -159,6 +130,7 @@ def attackCipher(ciphertext, origA, origB):
     
     print("Attack result: ", plaintext)
 
+# Same as attackCipher but assumes most common charachters are "a" and " "
 def attackCipherASpace(ciphertext, origA, origB):
     asciiSpace = 32
     # asciiA = 97
@@ -196,6 +168,45 @@ def attackCipherASpace(ciphertext, origA, origB):
 def getCommon(list):
     return list[0]
 
+# --------------------Neccessary Math Section -------------------- 
+# Necessary Math operations
+# Finding greatest common divisor
+def gcd(a, b):
+    # Return the GCD of a and b using Euclid's Algorithm
+    while a != 0:
+        a, b = b % a, a
+    return b
+
+# Euclidean Algorithm
+# # Returns inverse of a with mod m
+def findModInverse(a, m):
+    
+
+    if gcd(a, m) != 1:
+        return None # no mod inverse if a & m aren't relatively prime
+
+    
+    # "Vector" One
+    wI = 1 
+    wJ = 0
+    wK = a
+    
+    # "Vector" Two
+    vI = 0 
+    vJ = 1
+    vK = m
+    
+    # Apply Euclidean Algorithm
+    while vK != 0:
+        q = wK // vK # Integer Division
+        vI = (wI - q * vI)
+        vJ = (wJ - q * vJ)
+        vK = (wK - q * vK)
+        wI = vI 
+        wJ = vJ
+        wK = vK
+    
+    return wI % m
 
 # Main Program
 if __name__ == "__main__":
