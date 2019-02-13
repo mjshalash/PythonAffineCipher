@@ -2,9 +2,9 @@ import sys, os, random, string, collections
 
 def main():
     print("""
-    1.) Encrypt test.txt
-    2.) Decrypt test.txt
-    3.) Attack Encrypted test.txt
+    1.) Encrypt
+    2.) Decrypt
+    3.) Attack
     """)
 
     res = input("What would you like to do? \n")
@@ -26,7 +26,7 @@ def useCipher(mode):
 
     # Encryption/Decryption paramaters
     myMessage = file.read()
-    myKey = 37293 #getRandomKey
+    myKey = getRandomKey()
     myMode = mode
 
     # Determines whether we are encrypting a message or decrypting a message
@@ -68,15 +68,19 @@ def encrypt(key, message):
         symIndex = ord(symbol)
         cipherText += chr((symIndex * origA + origB) % 256)
 
-    print("Ciphertext: "+ cipherText)
-    print("Plaintext: "+ decrypt(key, cipherText))
+    print("Ciphertext Recieved: "+ cipherText)
+    print()
+    print()
+    print("Decrypted Plaintext: "+ decrypt(key, cipherText))
     
     # Run attack function to see if same keys can be achieved
-    attackCipher(cipherText, origA, origB)
+    #print("Running Attack....Standby!")
+    #attackCipher(cipherText)
     
 # Affine Decryption function
 def decrypt(key, message):
     keyA, keyB = getKeyParts(key)
+
     checkKeys(keyA, keyB, 'd')
     plaintext = ''
     modInverseOfKeyA = findModInverse(keyA, 256)
@@ -96,7 +100,7 @@ def getRandomKey():
             return keyA * 256 + keyB
 
 # --------------------Attack Section -------------------- 
-def attackCipher(ciphertext, origA, origB):
+def attackCipher(ciphertext):
     asciiSpace = 32
     
     # Final Equation Variables
@@ -111,15 +115,6 @@ def attackCipher(ciphertext, origA, origB):
     b = (firstAscii - (a)*(asciiSpace)) % (256)
 
     checkKeys(a, b, 'd')
-
-    # Verify the attack keys are same as original encryption keys
-    # If so, then attack succeeded
-    if a == origA and b == origB: 
-        print ("a = "+a+" = Original a: "+origA)
-        print ("b = "+b+" = Original b: "+origB)
-        print("Encryption Keys Found, Attack Succeeded!")
-    else:
-        print("Attack Failed!")
 
     plaintext = ''
     modInverseOfKeyA = findModInverse(a, 256)
@@ -169,44 +164,28 @@ def getCommon(list):
     return list[0]
 
 # --------------------Neccessary Math Section -------------------- 
-# Necessary Math operations
 # Finding greatest common divisor
 def gcd(a, b):
-    # Return the GCD of a and b using Euclid's Algorithm
     while a != 0:
         a, b = b % a, a
     return b
 
 # Euclidean Algorithm
-# # Returns inverse of a with mod m
-def findModInverse(a, m):
+# Returns inverse of a with mod m
+def findModInverse(a, m) : 
+    a = a % m    
     
+    # Loop through values of x from 1 to m
+    for x in range(1, m) :
 
-    if gcd(a, m) != 1:
-        return None # no mod inverse if a & m aren't relatively prime
+        # If x times a results in a modulus remainder of 1 then we found our inverse!
+        if ((a * x) % m == 1):
 
+            # Return x as it is the inverse 
+            return x 
     
-    # "Vector" One
-    wI = 1 
-    wJ = 0
-    wK = a
-    
-    # "Vector" Two
-    vI = 0 
-    vJ = 1
-    vK = m
-    
-    # Apply Euclidean Algorithm
-    while vK != 0:
-        q = wK // vK # Integer Division
-        vI = (wI - q * vI)
-        vJ = (wJ - q * vJ)
-        vK = (wK - q * vK)
-        wI = vI 
-        wJ = vJ
-        wK = vK
-    
-    return wI % m
+    # If none is found then return 1 by default
+    return 1
 
 # Main Program
 if __name__ == "__main__":
