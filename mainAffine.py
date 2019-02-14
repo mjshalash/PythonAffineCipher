@@ -1,4 +1,4 @@
-import sys, os, random, string, collections
+import sys, os, random, string, collections, textStats
 
 def main():
     
@@ -75,6 +75,10 @@ def encrypt(key, message):
     # Run attack function to see if same keys can be achieved
     print("Running Attack....Standby!")
     attackCipher(cipherText)
+
+    # Run Statistics Analysis
+    textStats.analyzePlaintext()
+    textStats.analyzeCiphertext(cipherText)
     
 # Affine Decryption function
 def decrypt(key, message):

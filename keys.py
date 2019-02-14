@@ -40,10 +40,12 @@ def main():
     # Finding involuntary keys will require using a and b pair to solve if
     # x = (ax + b) % 256 is true aka the key does not do anything
     for x in range(1, 256):
-        for a in range(0, 256):
+        for a in range(1, 256):
             for b in range (0, 256):
                 if (x*a + b) == x:
-                   print('%d %d %d' % (x, a, b)) 
+                    print('%d , %d' %(a,b))
+
+    print("Total number of involuntary keys is: 1")
 
 # Main Program
 if __name__ == "__main__":
