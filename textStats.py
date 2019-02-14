@@ -1,5 +1,6 @@
 import sys, os, random, string, collections, statistics
-
+import numpy
+from scipy.stats import entropy
 plainCodes = []
 cipherCodes = []
 
@@ -35,8 +36,10 @@ def analyzePlaintext():
     print("Median: %d, Char: %s" %(plainMedian, chr(int(plainMedian))))
 
     # Entropy
-
-
+    messageStats = collections.Counter(plainSymbols)
+    sortStats = sorted(messageStats)
+    ent = findEntropy(sortStats, 256)
+    print("Entropy: %f" %ent)
 
 def analyzeCiphertext(ciphertext):
     
@@ -61,6 +64,15 @@ def analyzeCiphertext(ciphertext):
     print("Median: %d, Char: %s" %(cipherMedian, chr(int(cipherMedian))))
 
     # Entropy
+    messageStats = collections.Counter(ciphertext)
+    sortStats = sorted(messageStats)
+    ent = findEntropy(sortStats, 256)
+    print("Entropy: %f" %ent)
+
+def findEntropy(labels, base=None):
+    value,counts = numpy.unique(labels, return_counts=True)
+    return entropy(counts, base=base)
+
 
 if __name__ == "__main__":
     main()
