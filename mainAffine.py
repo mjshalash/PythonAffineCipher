@@ -1,6 +1,8 @@
 import sys, os, random, string, collections
 
 def main():
+    
+    # Menu
     print("""
     1.) Encrypt
     2.) Decrypt
@@ -30,7 +32,6 @@ def useCipher(mode):
     myMode = mode
 
     # Determines whether we are encrypting a message or decrypting a message
-    # TODO Need to write back to same file with encrypted or decrypted text for easy conversion between the two
     if myMode == 'e':
         encrypt(myKey, myMessage)
     elif myMode == 'd':
@@ -38,25 +39,22 @@ def useCipher(mode):
 
     file.close()
 
-    # Write back to test file
-    # file2 = open("testFiles/test.txt", "w")
-    # file2.write(answer)
-
 # Get Key Parts
 def getKeyParts(key):
     a = key // 256    # Quotient 
     b = key % 256     # Remainder
     return (a, b)     # Return tuple of both keys
 
+# Validate the key parts are strong enough to create a secure encryption
 def checkKeys(keyA, keyB, mode):
     if keyA == 1 and mode == 'e':
-        sys.exit('a equals one.  Choose a different key.')
+        sys.exit('a cannot equal one.')
     if keyB == 0 and mode == 'e':
-        sys.exit('b equals one.  Choose a different key.')
+        sys.exit('b cannot equal zero.')
     if keyA < 0 or keyB < 0 or keyB > 255:
         sys.exit('a must be greater than 0 and b must be between 0 and %s.' % (255))
     if gcd(keyA, 256) != 1:
-        sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, 256))  
+        sys.exit('a and the set size are not relatively prime.')  
 
 # Affine Encryption function
 def encrypt(key, message):
@@ -64,27 +62,33 @@ def encrypt(key, message):
 
     checkKeys(origA, origB, 'e')     # Validate that keys are correct
     cipherText = ''
-    for symbol in message:   # For each letter in the .txt file, run it through encryption function 
+    for symbol in message:           # For each letter in the .txt file, run it through encryption function 
         symIndex = ord(symbol)
         cipherText += chr((symIndex * origA + origB) % 256)
 
     print("Ciphertext Recieved: "+ cipherText)
     print()
     print()
+    # Run decryption
     print("Decrypted Plaintext: "+ decrypt(key, cipherText))
     
     # Run attack function to see if same keys can be achieved
-    #print("Running Attack....Standby!")
-    #attackCipher(cipherText)
+    print("Running Attack....Standby!")
+    attackCipher(cipherText)
     
 # Affine Decryption function
 def decrypt(key, message):
+    # Get same key parts utilized in encryption
     keyA, keyB = getKeyParts(key)
 
+    # Validate keys are recieved properly
     checkKeys(keyA, keyB, 'd')
     plaintext = ''
+    
+    # Find modular inverse of part a of the key
     modInverseOfKeyA = findModInverse(keyA, 256)
 
+    # For each plaintext symbol in the message, run through decryption function
     for symbol in message:
         symIndex = ord(symbol)
         plaintext += chr((symIndex - keyB) * modInverseOfKeyA % 256)
@@ -125,50 +129,16 @@ def attackCipher(ciphertext):
     
     print("Attack result: ", plaintext)
 
-# Same as attackCipher but assumes most common charachters are "a" and " "
-def attackCipherASpace(ciphertext, origA, origB):
-    asciiSpace = 32
-    # asciiA = 97
-    
-    # Final Equation Variables
-    a = 0
-    b = 0
-
-    # Assume that " " and "e" are the two most common charachters in encypted text
-    firstAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[0]))   # Assume this charachter is ' '
-    secondAscii = ord(getCommon(collections.Counter(ciphertext).most_common(2)[1]))   # Assume this charachter is a
-
-    a = (193*(firstAscii - secondAscii)) % (256) # 193 is inverse of 97 - 32 = 65
-    b = (firstAscii - (a)*(asciiSpace)) % (256)
-
-    checkKeys(a, b, 'd')
-
-    # Verify the attack keys are same as original encryption keys
-    # If so, then attack succeeded
-    if a == origA and b == origB: 
-        print("Keys Match, Attack Succeeded!")
-    else:
-        print("Attack Failed!")
-
-    plaintext = ''
-    modInverseOfKeyA = findModInverse(a, 256)
-
-    for symbol in ciphertext:
-        symIndex = ord(symbol)
-        plaintext += chr((symIndex - b) * modInverseOfKeyA % 256)
-    
-    print("Attack result: ", plaintext)    
-
-# Get only the charachter from the list
+# Used to get only the charachter from the "most common charachter" collections function
 def getCommon(list):
     return list[0]
 
 # --------------------Neccessary Math Section -------------------- 
 # Finding greatest common divisor
-def gcd(a, b):
-    while a != 0:
-        a, b = b % a, a
-    return b
+def gcd(x, y):
+    while x != 0:
+        x, y = y % x, x
+    return y
 
 # Euclidean Algorithm
 # Returns inverse of a with mod m
